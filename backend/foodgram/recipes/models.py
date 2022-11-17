@@ -20,18 +20,19 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
-    name = models.SlugField(max_length=200, unique=True, blank=False)
-    measurement_unit = models.SlugField(
-        max_length=200, unique=True, blank=False
+    name = models.CharField(max_length=200, blank=False)
+    measurement_unit = models.CharField(
+        max_length=200, blank=False
     )
 
     class Meta:
+        unique_together = ('name', 'measurement_unit')
         verbose_name = "Игредиент"
         verbose_name_plural = "Игредиенты"
         ordering = ['id']
 
     def __str__(self):
-        return self.name[:15]
+        return self.name[:30]
 
 
 class Recipe(models.Model):
