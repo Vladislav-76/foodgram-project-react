@@ -1,34 +1,58 @@
 from django.contrib.auth import get_user_model
-from rest_framework import viewsets
+from djoser.views import UserViewSet
+from rest_framework import status, viewsets
+from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
-from api.serializers import UserSerializer
+from recipes.models import Tag
+from .permissions import AuthorAdminOrReadOnly
+from .serializers import (
+    CustomAuthTokenSerializer, CustomUserSerializer, TagSerializer
+)
 from .pagination import MyPagination
 
 
 User = get_user_model()
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class CustomUserViewSet(UserViewSet):
     """Представление для эндпойнта /users/"""
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+    # queryset = User.objects.all()
+    permission_classes = (AuthorAdminOrReadOnly,)
+    serializer_class = CustomUserSerializer
     pagination_class = MyPagination
-    # filter_backends = (filters.SearchFilter,)
-    # search_fields = ('$username',)
-    # permission_classes = [AdminOrSUOnly]
-    # lookup_field = 'username'
 
-    @action(detail=False, methods=['get', 'patch'],
-            permission_classes=[IsAuthenticated])
-    def me(self, request):
-        """Представление для эндпойнта /users/me/"""
-        if request.method == 'PATCH':
-            serializer = UserSerializer(
-                request.user, data=request.data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save(role=request.user.role)
-            return Response(serializer.data)
-        serializer = UserSerializer(request.user)
-        return Response(serializer.data)
+    # def create(self, request):
+    #     """Создание пользователя"""
+    #     serializer = CustomUserPostSerializer(
+    #         data=request.data
+    #     )
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(serializer.data)
+
+    # @action(detail=False, methods=['get'],
+    #         permission_classes=[AuthorAdminOrReadOnly])
+    # def me(self, request):
+    #     """Представление для эндпойнта /users/me/"""
+    #     serializer = CustomUserSerializer(request.user)
+    #     return Response(serializer.data)
+
+
+class CustomAuthToken(ObtainAuthToken):
+    '''Представление для эндпойнта /auth/token/login/'''
+    serializer_class = CustomAuthTokenSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key})
+
+
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer

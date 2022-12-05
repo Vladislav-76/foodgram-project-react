@@ -8,7 +8,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": ["csvtobd", "Ingredient", "ingredients_t.csv"]
+            "args": ["csvtobd", "Ingredient", "ingredients_t.csv"],
             "justMyCode": true
         },
         {
@@ -16,6 +16,16 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Django",
+            "type": "python",
+            "request": "launch",
+            "python": "${workspaceFolder}\\venv\\scripts\\python.exe",
+            "program": "${workspaceFolder}\\backend\\foodgram\\manage.py",
+            "args": ["runserver"],
+            "django": true,
             "justMyCode": true
         }
     ]
