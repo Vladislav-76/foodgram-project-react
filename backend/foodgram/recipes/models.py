@@ -70,24 +70,26 @@ class Recipe(models.Model):
         User, verbose_name='Список покупок',
         related_name='carts'
     )
-    name = models.SlugField(
+    name = models.CharField(
         verbose_name='Блюдо', max_length=200, unique=True, blank=False
     )
     image = models.ImageField(
         verbose_name='Картинка', upload_to='recipes/images/',
-        null=True, default=None
+        null=True, default=None, blank=True
     )
     text = models.TextField(
-        verbose_name='Текст рецепта', help_text='Текст рецепта'
+        verbose_name='Текст рецепта', help_text='Текст рецепта',
+        blank=True, null=True
     )
     cooking_time = models.IntegerField(
         verbose_name='Время приготовления',
         validators=[MinValueValidator(
-            1, message='Время не может быть меньше 1'), ]
+            1, message='Время не может быть меньше 1'), ],
+        blank=True, null=True
     )
     pub_date = models.DateTimeField(
         verbose_name='Дата публикации',
-        auto_now_add=True,
+        auto_now_add=True, db_index=True
     )
 
     class Meta:
@@ -97,7 +99,7 @@ class Recipe(models.Model):
         unique_together = ('author', 'name')
 
     def __str__(self):
-        return self.text[:15]
+        return self.name[:30]
 
 
 # class RecipeTag(models.Model):
@@ -123,7 +125,7 @@ class RecipeIngredient(models.Model):
         Ingredient, verbose_name='Ингредиенты',
         related_name='recipe', on_delete=models.CASCADE
     )
-    quantity = models.FloatField(
+    amount = models.FloatField(
         verbose_name='Количество', blank=False,
         validators=[
             MinValueValidator(0.1, message='Количество слишком мало'), ]

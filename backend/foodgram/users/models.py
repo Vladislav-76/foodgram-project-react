@@ -8,7 +8,7 @@ ROLES = (
 
 
 class User(AbstractUser):
-    username = models.SlugField(
+    username = models.CharField(
         max_length=150,
         verbose_name='Имя пользователя',
         unique=True, blank=False
