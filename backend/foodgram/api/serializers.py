@@ -128,7 +128,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для рецептов."""
-    tags = TagSerializer(many=True)
+    tags = TagSerializer(many=True, read_only=True)
     author = CustomUserSerializer(read_only=True)
     ingredients = serializers.SerializerMethodField(read_only=True)
     is_favorited = serializers.SerializerMethodField(read_only=True)
@@ -144,14 +144,15 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         user = self.context['request'].user
+        # favor = obj.favorite
         if user.is_authenticated:
-            return obj.favorite.filter(author=user).exists()
+            return user.favorites.filter(id=obj.id).exists()
         return False
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context['request'].user
         if user.is_authenticated:
-            return obj.shopping_cart.filter(author=user).exists()
+            return user.carts.filter(id=obj.id).exists()
         return False
 
     def get_ingredients(self, obj):
@@ -159,3 +160,52 @@ class RecipeSerializer(serializers.ModelSerializer):
             'id', 'name', 'measurement_unit', amount=F('recipe__amount')
         )
         return ingredients
+
+    def validate(self, data):
+        name = str(self.initial_data.get('name'))
+        tags = self.initial_data.get('tags')
+        ingredients = self.initial_data.get('ingredients')
+
+        if not name.replace(' ', '').isalpha():
+            raise ValidationError('Название должно содержать буквы.')
+
+        if not isinstance(tags, list) or not isinstance(ingredients, list):
+            raise ValidationError('Теги и ингредиенты должны быть списками.')
+
+        for tag in tags:
+            result = Tag.objects.filter(id=tag)
+            if not result:
+                raise ValidationError(f'Такого тега {tag} нет.')
+
+        ingredients_amount = []
+        for ingredient in ingredients:
+            result = Ingredient.objects.filter(id=ingredient['id'])
+            if not result:
+                raise ValidationError(f'Такого ингредиента {ingredient} нет.')
+            amount = ingredient.get('amount')
+            if not isinstance(amount, (int, float)):
+                raise ValidationError(
+                    f'Значение {amount} должно быть числом.')
+            ingredient = get_object_or_404(Ingredient, id=ingredient['id'])
+            ingredients_amount.append(
+                {'ingredient': ingredient, 'amount': amount})
+
+        data['name'] = name
+        data['tags'] = tags
+        data['ingredients'] = ingredients_amount
+        data['author'] = self.context.get('request').user
+        return data
+
+    def create(self, validated_data):
+        image = validated_data.pop('image')
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('ingredients')
+        recipe = Recipe.objects.create(image=image, **validated_data)
+        recipe.tags.set(tags)
+        for ingredient in ingredients:
+            RecipeIngredient.objects.get_or_create(
+                recipe=recipe,
+                ingredient=ingredient['ingredient'],
+                amount=ingredient['amount']
+            )
+        return recipe

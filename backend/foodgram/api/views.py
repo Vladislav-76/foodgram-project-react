@@ -64,12 +64,13 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipesViewSet(viewsets.ModelViewSet):
     """Представление для эндпойнта /recipes/"""
     queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer
     pagination_class = MyPagination
     permission_classes = (AuthorAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
-    def get_serializer_class(self):
-        # if self.action == 'create' or self.action == 'partial_update':
-        #     return RecipesSerializerCreate
-        return RecipeSerializer
+    # def get_serializer_class(self):
+    #     # if self.action == 'create' or self.action == 'partial_update':
+    #     #     return RecipesSerializerCreate
+    #     return RecipeSerializer
