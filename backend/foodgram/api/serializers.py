@@ -185,7 +185,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             amount = ingredient.get('amount')
             if not isinstance(amount, (int, float)):
                 raise ValidationError(
-                    f'Значение {amount} должно быть числом.')
+                    f'Значение количества {amount} должно быть числом.')
             ingredient = get_object_or_404(Ingredient, id=ingredient['id'])
             ingredients_amount.append(
                 {'ingredient': ingredient, 'amount': amount})
@@ -209,3 +209,33 @@ class RecipeSerializer(serializers.ModelSerializer):
                 amount=ingredient['amount']
             )
         return recipe
+
+    def update(self, recipe, validated_data):
+        ingredients = validated_data.get('ingredients')
+        tags = validated_data.get('tags')
+        recipe.image = validated_data.get('image', recipe.image)
+        recipe.name = validated_data.get('name', recipe.name)
+        recipe.text = validated_data.get('text', recipe.text)
+        recipe.cooking_time = validated_data.get(
+            'cooking_time', recipe.cooking_time)
+        if tags:
+            recipe.tags.clear()
+            recipe.tags.set(tags)
+        if ingredients:
+            recipe.ingredients.clear()
+            for ingredient in ingredients:
+                RecipeIngredient.objects.get_or_create(
+                    recipe=recipe,
+                    ingredient=ingredient['ingredient'],
+                    amount=ingredient['amount']
+                )
+        recipe.save()
+        return recipe
+
+
+class AddDelRecipeSerializer(serializers.ModelSerializer):
+    """Сериалайзер для добавления/удаления рецепта."""
+
+    class Meta:
+        fields = ('id', 'name', 'image', 'cooking_time')
+        model = Recipe

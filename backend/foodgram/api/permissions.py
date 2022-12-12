@@ -10,6 +10,6 @@ class AuthorAdminOrReadOnly(IsAuthenticatedOrReadOnly):
         return True
 
     def has_object_permission(self, request, view, obj):
-        if request.method in SAFE_METHODS or request.user.is_admin:
+        if request.method in SAFE_METHODS or request.user.role is 'admin':
             return True
         return request.user == obj.author
