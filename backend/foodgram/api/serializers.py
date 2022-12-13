@@ -23,9 +23,10 @@ class CustomUserSerializer(UserSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'id', 'username', 'first_name',
-                  'last_name', 'is_subscribed', 'password')
-        # extra_kwargs = {'password': {'write_only': True}}
+        fields = (
+            'email', 'id', 'username', 'first_name',
+            'last_name', 'is_subscribed', 'password'
+        )
         read_only_fields = 'is_subscribed',
 
     def get_is_subscribed(self, obj):
@@ -54,43 +55,36 @@ class CustomUserSerializer(UserSerializer):
         return user
 
 
-# class CustomUserPostSerializer(UserSerializer):
-#     """Сериализатор для эндпойнта /users/"""
+class SubscriptionsSerializer(CustomUserSerializer):
+    """Сериалайзер для подписок пользователей."""
+    email = serializers.ReadOnlyField(source='following.email')
+    id = serializers.ReadOnlyField(source='following.id')
+    username = serializers.ReadOnlyField(source='following.username')
+    first_name = serializers.ReadOnlyField(source='following.first_name')
+    last_name = serializers.ReadOnlyField(source='following.last_name')
+    is_subscribed = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
 
-#     class Meta:
-#         model = User
-#         fields = ('email', 'id', 'username', 'first_name', 'last_name')
+    class Meta:
+        model = User
+        fields = (
+            'email', 'id', 'username', 'first_name',
+            'last_name', 'is_subscribed', 'recipes', 'recipes_count'
+        )
 
+    def get_is_subscribed(self, data):
+        return True
 
-# class CustomAuthTokenSerializer(serializers.Serializer):
-#     '''Сериализатор для эндпойнта /auth/token/login/'''
-#     password = serializers.CharField(
-#         label="Password", style={'input_type': 'password'}
-#     )
-#     email = serializers.EmailField(label="Email")
+    def get_recipes(self, data):
+        limit = self.context.get('request').query_params.get('recipes_limit')
+        if not limit:
+            limit = 3
+        recipes = data.author.recipes.all()[:int(limit)]
+        return AddDelRecipeSerializer(recipes, many=True).data
 
-#     def validate(self, attrs):
-#         password = attrs.get('password')
-#         email = attrs.get('email')
-
-#         if email and password:
-#             username = get_object_or_404(User, email=email).username
-#             user = authenticate(username=username, password=password)
-#             if user:
-#                 if not user.is_active:
-#                     msg = 'Аккаунт пользователя отключен.'
-#                     raise serializers.ValidationError(
-#                         msg, code='authorization'
-#                     )
-#             else:
-#                 msg = 'Неверные почта или пароль.'
-#                 raise serializers.ValidationError(msg, code='authorization')
-#         else:
-#             msg = 'Запрос должен включать "email" и "password".'
-#             raise serializers.ValidationError(msg, code='authorization')
-
-#         attrs['user'] = user
-#         return attrs
+    def get_recipes_count(self, data):
+        return data.author.recipes.count()
 
 
 class TagSerializer(serializers.ModelSerializer):

@@ -5,20 +5,22 @@ from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from rest_framework import status, viewsets
+from rest_framework import filters, status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST)
-from recipes.models import Recipe, RecipeIngredient, Tag
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
+from users.models import Subscriptions
 from .filter import RecipeFilter
 from .permissions import AuthorAdminOrReadOnly
 from .serializers import (
-    CustomUserSerializer, AddDelRecipeSerializer, RecipeSerializer,
-    TagSerializer
+    CustomUserSerializer, AddDelRecipeSerializer, IngredientSerializer,
+    RecipeSerializer, SubscriptionsSerializer, TagSerializer
 )
 from .pagination import MyPagination
 
@@ -33,15 +35,6 @@ class CustomUserViewSet(UserViewSet):
     serializer_class = CustomUserSerializer
     pagination_class = MyPagination
 
-    # def create(self, request):
-    #     """Создание пользователя"""
-    #     serializer = CustomUserPostSerializer(
-    #         data=request.data
-    #     )
-    #     serializer.is_valid(raise_exception=True)
-    #     serializer.save()
-    #     return Response(serializer.data)
-
     @action(detail=False, methods=['get'],
             permission_classes=[IsAuthenticated])
     def me(self, request):
@@ -49,17 +42,42 @@ class CustomUserViewSet(UserViewSet):
         serializer = CustomUserSerializer(request.user)
         return Response(serializer.data)
 
+    @action(
+        detail=False, methods=['get'],
+        permission_classes=[IsAuthenticated])
+    def subscriptions(self, request):
+        """Представление для списка подписок."""
+        pages = self.paginate_queryset(
+            Subscriptions.objects.filter(user=request.user))
+        serializer = SubscriptionsSerializer(
+            pages, many=True, context={'request': request})
+        return self.get_paginated_response(serializer.data)
 
-# class CustomAuthToken(ObtainAuthToken):
-#     '''Представление для эндпойнта /auth/token/login/'''
-#     serializer_class = CustomAuthTokenSerializer
+    @action(
+        detail=True, methods=['post', 'delete'],
+        url_path='subscribe', permission_classes=[IsAuthenticated])
+    def subscribe(self, request, id=None):
+        """Представление для изменения подписки."""
+        user = get_object_or_404(User, id=id)
+        follow = Subscriptions.objects.filter(user=request.user, author=user)
+        if request.method == 'POST':
+            if user == request.user:
+                error = {'errors': 'Нельзя подписаться на самого себя.'}
+                return Response(error, status=status.HTTP_400_BAD_REQUEST)
+            obj, created = Subscriptions.objects.get_or_create(
+                user=request.user, author=user)
+            if not created:
+                error = {'errors': 'Вы уже подписаны на этого автора.'}
+                return Response(error, status=status.HTTP_400_BAD_REQUEST)
+            serializer = SubscriptionsSerializer(
+                obj, context={'request': request})
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-#     def post(self, request, *args, **kwargs):
-#         serializer = self.serializer_class(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         user = serializer.validated_data['user']
-#         token, created = Token.objects.get_or_create(user=user)
-#         return Response({'token': token.key})
+        if not follow.exists():
+            error = {'errors': 'Вы не подписаны на этого автора.'}
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
+        follow.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -166,3 +184,15 @@ class RecipesViewSet(viewsets.ModelViewSet):
             else:
                 error = {'errors': 'Такого рецепта в избранном нет.'}
                 return Response(error, status=status.HTTP_400_BAD_REQUEST)
+
+
+class IngredientsViewSet(
+    ListModelMixin, RetrieveModelMixin, viewsets.GenericViewSet
+):
+    """Представление для ингредиентов."""
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
+    pagination_class = None
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name', ]

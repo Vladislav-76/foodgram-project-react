@@ -5,21 +5,13 @@ from recipes.models import Recipe, Tag
 
 class RecipeFilter(FilterSet):
     """Фильтр для эндпойнта /recipes/"""
-
-    author = filters.CharFilter(
-        field_name='author__id',
-    )
+    author = filters.CharFilter(field_name='author__id',)
     tags = filters.ModelMultipleChoiceFilter(
-        field_name='tags__slug',
-        to_field_name='slug',
+        field_name='tags__slug', to_field_name='slug',
         queryset=Tag.objects.all()
     )
-    is_favorited = filters.BooleanFilter(
-        method='favorited_filter'
-    )
-    is_in_shopping_cart = filters.BooleanFilter(
-        method='cart_filter'
-    )
+    is_favorited = filters.BooleanFilter(method='favorited_filter')
+    is_in_shopping_cart = filters.BooleanFilter(method='cart_filter')
 
     def favorited_filter(self, queryset, name, value):
         if value:
