@@ -102,19 +102,6 @@ class Recipe(models.Model):
         return self.name[:30]
 
 
-# class RecipeTag(models.Model):
-#     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-#     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-
-#     class Meta:
-#         verbose_name = "Рецепт-Тег"
-#         verbose_name_plural = "Рецепты-Теги"
-#         ordering = ['id']
-
-#     def __str__(self):
-#         return f'{self.recipe}-{self.tag}'
-
-
 class RecipeIngredient(models.Model):
     """Модель связи рецепты - ингредиенты."""
     recipe = models.ForeignKey(
@@ -139,29 +126,3 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         return f'{self.recipe}-{self.ingredient}'
-
-
-# class Favorite(models.Model):
-#     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-#     recipe_id = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-
-#     class Meta:
-#         verbose_name = "Список избранного"
-#         verbose_name_plural = "Списки избранного"
-#         ordering = ['id']
-
-#     def __str__(self):
-#         return f'{self.user_id}-{self.recipe_id}'
-
-
-# class ShoppingCart(models.Model):
-#     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-#     recipe_id = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-
-#     class Meta:
-#         verbose_name = "Список покупок"
-#         verbose_name_plural = "Списки покупок"
-#         ordering = ['id']
-
-#     def __str__(self):
-#         return f'{self.user_id}-{self.recipe_id}'

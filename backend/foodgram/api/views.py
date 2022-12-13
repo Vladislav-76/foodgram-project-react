@@ -1,16 +1,15 @@
 from datetime import datetime
 from django.contrib.auth import get_user_model
-from django.db.models import Avg, F, Sum
+from django.db.models import Sum
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from rest_framework import filters, status, viewsets
-from rest_framework.authtoken.models import Token
-from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (
+    IsAuthenticated, IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST)
@@ -83,6 +82,7 @@ class CustomUserViewSet(UserViewSet):
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = None
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
@@ -93,11 +93,6 @@ class RecipesViewSet(viewsets.ModelViewSet):
     permission_classes = (AuthorAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
-
-    # def get_serializer_class(self):
-    #     # if self.action == 'create' or self.action == 'partial_update':
-    #     #     return RecipesSerializerCreate
-    #     return RecipeSerializer
 
     @action(
         methods=('get',), detail=False,

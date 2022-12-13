@@ -1,12 +1,10 @@
 from django.db.models import F
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
-# from rest_framework.authtoken.serializers import AuthTokenSerializer
-from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserSerializer
-from rest_framework.serializers import (
-    ModelSerializer, SerializerMethodField, ValidationError)
+from rest_framework.serializers import ValidationError
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from users.models import Subscriptions
 
@@ -101,23 +99,6 @@ class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
         fields = '__all__'
-
-
-# class RecipeIngredientSerialiser(serializers.ModelSerializer):
-#     """Сериализатор ингредиентов для рецепта с количеством."""
-#     id = IngredientSerializer()
-#     name = serializers.CharField(required=False)
-#     measurement_unit = serializers.CharField(required=False)
-#     quantity = serializers.FloatField()
-
-#     class Meta:
-#         model = RecipeIngredient
-#         fields = ('id', 'name', 'measurement_unit', 'quantity')
-
-#     def to_representation(self, instance):
-#         data = IngredientSerializer(instance).data
-#         data['quantity'] = instance.recipes
-#         return data
 
 
 class RecipeSerializer(serializers.ModelSerializer):
