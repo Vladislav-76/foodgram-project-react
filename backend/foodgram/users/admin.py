@@ -1,7 +1,9 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from .models import (Subscriptions)
+
+from .models import Subscriptions
+
 
 User = get_user_model()
 

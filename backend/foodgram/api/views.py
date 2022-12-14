@@ -1,27 +1,28 @@
 from datetime import datetime
+
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
-from rest_framework.permissions import (
-    IsAuthenticated, IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
-from rest_framework.status import (
-    HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST)
-from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
+from rest_framework.status import (HTTP_201_CREATED, HTTP_204_NO_CONTENT,
+                                   HTTP_400_BAD_REQUEST)
 from users.models import Subscriptions
+
 from .filter import RecipeFilter
-from .permissions import AuthorAdminOrReadOnly
-from .serializers import (
-    CustomUserSerializer, AddDelRecipeSerializer, IngredientSerializer,
-    RecipeSerializer, SubscriptionsSerializer, TagSerializer
-)
 from .pagination import MyPagination
+from .permissions import AuthorAdminOrReadOnly
+from .serializers import (AddDelRecipeSerializer, CustomUserSerializer,
+                          IngredientSerializer, RecipeSerializer,
+                          SubscriptionsSerializer, TagSerializer)
 
 
 User = get_user_model()
@@ -117,7 +118,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         )
         for ing in ingredients:
             shopping_list += (
-                f'{ing["ingredient__name"]}: ' +
+                f'{ing["ingredient__name"]}: '
                 f'{ing["amount"]}'
                 f'{ing["ingredient__measurement_unit"]}\n'
             )
@@ -143,16 +144,14 @@ class RecipesViewSet(viewsets.ModelViewSet):
             if not recipe_in_cart:
                 user.carts.add(recipe)
                 return Response(serializer.data, status=HTTP_201_CREATED)
-            else:
-                error = {'errors': 'Такой рецепт уже есть в списке.'}
-                return Response(error, status=status.HTTP_400_BAD_REQUEST)
+            error = {'errors': 'Такой рецепт уже есть в списке.'}
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
         if request.method == 'DELETE':
             if recipe_in_cart:
                 user.carts.remove(recipe)
                 return Response(status=HTTP_204_NO_CONTENT)
-            else:
-                error = {'errors': 'Такого рецепта в списке нет.'}
-                return Response(error, status=status.HTTP_400_BAD_REQUEST)
+            error = {'errors': 'Такого рецепта в списке нет.'}
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
 
     @action(
         methods=('post', 'delete'), detail=True,
