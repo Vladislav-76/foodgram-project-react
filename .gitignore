@@ -27,6 +27,8 @@ share/python-wheels/
 *.egg
 MANIFEST
 node_modules/
+.vscode/
+bash.exe.stackdump
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
