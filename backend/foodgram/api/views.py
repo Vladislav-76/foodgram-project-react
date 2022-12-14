@@ -146,12 +146,11 @@ class RecipesViewSet(viewsets.ModelViewSet):
                 return Response(serializer.data, status=HTTP_201_CREATED)
             error = {'errors': 'Такой рецепт уже есть в списке.'}
             return Response(error, status=status.HTTP_400_BAD_REQUEST)
-        if request.method == 'DELETE':
-            if recipe_in_cart:
-                user.carts.remove(recipe)
-                return Response(status=HTTP_204_NO_CONTENT)
-            error = {'errors': 'Такого рецепта в списке нет.'}
-            return Response(error, status=status.HTTP_400_BAD_REQUEST)
+        if recipe_in_cart:
+            user.carts.remove(recipe)
+            return Response(status=HTTP_204_NO_CONTENT)
+        error = {'errors': 'Такого рецепта в списке нет.'}
+        return Response(error, status=status.HTTP_400_BAD_REQUEST)
 
     @action(
         methods=('post', 'delete'), detail=True,
@@ -168,16 +167,13 @@ class RecipesViewSet(viewsets.ModelViewSet):
             if not recipe_in_favorite:
                 user.favorites.add(recipe)
                 return Response(serializer.data, status=HTTP_201_CREATED)
-            else:
-                error = {'errors': 'Такой рецепт уже есть в избранном.'}
-                return Response(error, status=status.HTTP_400_BAD_REQUEST)
-        if request.method == 'DELETE':
-            if recipe_in_favorite:
-                user.favorites.remove(recipe)
-                return Response(status=HTTP_204_NO_CONTENT)
-            else:
-                error = {'errors': 'Такого рецепта в избранном нет.'}
-                return Response(error, status=status.HTTP_400_BAD_REQUEST)
+            error = {'errors': 'Такой рецепт уже есть в избранном.'}
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
+        if recipe_in_favorite:
+            user.favorites.remove(recipe)
+            return Response(status=HTTP_204_NO_CONTENT)
+        error = {'errors': 'Такого рецепта в избранном нет.'}
+        return Response(error, status=status.HTTP_400_BAD_REQUEST)
 
 
 class IngredientsViewSet(
