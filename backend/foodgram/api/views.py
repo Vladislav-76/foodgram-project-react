@@ -109,7 +109,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         ).values(
             'ingredient__name',
             'ingredient__measurement_unit'
-        ).order_by('ingredient__name').annotate(amount=Sum('amount'))
+        ).order_by('ingredient__name').annotate(quantity=Sum('amount'))
 
         filename = f'{user.username}_shopping_list.txt'
         shopping_list = (
@@ -119,7 +119,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         for ing in ingredients:
             shopping_list += (
                 f'{ing["ingredient__name"]}: '
-                f'{ing["amount"]}'
+                f'{ing["quantity"]}'
                 f'{ing["ingredient__measurement_unit"]}\n'
             )
         shopping_list += '\n\n--------------------------------------------'
@@ -129,6 +129,23 @@ class RecipesViewSet(viewsets.ModelViewSet):
         response['Content-Disposition'] = f'attachment; filename={filename}'
         return response
 
+    def field_manager(self, request, pk, field):
+        """Добавляет/удаляет связи рецептов со списком покупок и избранным."""
+        recipe = get_object_or_404(Recipe, id=pk)
+        serializer = AddDelRecipeSerializer(recipe)
+        recipe_in_list = field.filter(id=recipe.id).exists()
+        if request.method == 'POST':
+            if not recipe_in_list:
+                field.add(recipe)
+                return Response(serializer.data, status=HTTP_201_CREATED)
+            error = {'errors': 'Такой рецепт уже есть в списке.'}
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
+        if recipe_in_list:
+            field.remove(recipe)
+            return Response(status=HTTP_204_NO_CONTENT)
+        error = {'errors': 'Такого рецепта в списке нет.'}
+        return Response(error, status=status.HTTP_400_BAD_REQUEST)
+
     @action(
         methods=('post', 'delete'), detail=True,
         url_path='shopping_cart',
@@ -136,21 +153,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     )
     def shopping_cart(self, request, pk):
         """Добавляет/удалет рецепт из списка покупок."""
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
-        serializer = AddDelRecipeSerializer(recipe)
-        recipe_in_cart = user.carts.filter(id=recipe.id).exists()
-        if request.method == 'POST':
-            if not recipe_in_cart:
-                user.carts.add(recipe)
-                return Response(serializer.data, status=HTTP_201_CREATED)
-            error = {'errors': 'Такой рецепт уже есть в списке.'}
-            return Response(error, status=status.HTTP_400_BAD_REQUEST)
-        if recipe_in_cart:
-            user.carts.remove(recipe)
-            return Response(status=HTTP_204_NO_CONTENT)
-        error = {'errors': 'Такого рецепта в списке нет.'}
-        return Response(error, status=status.HTTP_400_BAD_REQUEST)
+        return self.field_manager(request, pk, request.user.carts)
 
     @action(
         methods=('post', 'delete'), detail=True,
@@ -159,21 +162,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     )
     def favorite(self, request, pk):
         """Добавляет/удалет рецепт в избранное."""
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
-        serializer = AddDelRecipeSerializer(recipe)
-        recipe_in_favorite = user.favorites.filter(id=recipe.id).exists()
-        if request.method == 'POST':
-            if not recipe_in_favorite:
-                user.favorites.add(recipe)
-                return Response(serializer.data, status=HTTP_201_CREATED)
-            error = {'errors': 'Такой рецепт уже есть в избранном.'}
-            return Response(error, status=status.HTTP_400_BAD_REQUEST)
-        if recipe_in_favorite:
-            user.favorites.remove(recipe)
-            return Response(status=HTTP_204_NO_CONTENT)
-        error = {'errors': 'Такого рецепта в избранном нет.'}
-        return Response(error, status=status.HTTP_400_BAD_REQUEST)
+        return self.field_manager(request, pk, request.user.favorites)
 
 
 class IngredientsViewSet(

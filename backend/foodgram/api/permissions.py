@@ -1,5 +1,6 @@
 from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly, SAFE_METHODS)
+from users.models import ADMIN
 
 
 class AuthorAdminOrReadOnly(IsAuthenticatedOrReadOnly):
@@ -10,6 +11,10 @@ class AuthorAdminOrReadOnly(IsAuthenticatedOrReadOnly):
         return True
 
     def has_object_permission(self, request, view, obj):
-        if request.method in SAFE_METHODS or request.user.role == 'admin':
+        if (
+            request.method in SAFE_METHODS
+            or request.user.is_authenticated
+            and request.user.role == ADMIN
+        ):
             return True
         return request.user == obj.author

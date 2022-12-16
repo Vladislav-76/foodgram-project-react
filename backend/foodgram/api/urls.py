@@ -7,14 +7,14 @@ from .views import (CustomUserViewSet, IngredientsViewSet, RecipesViewSet,
 
 app_name = 'api'
 
-router = DefaultRouter()
-router.register('users', CustomUserViewSet, 'users')
-router.register('tags', TagViewSet, basename='tags')
-router.register('recipes', RecipesViewSet, basename='recipes')
-router.register('ingredients', IngredientsViewSet, basename='ingredients')
+router_v1 = DefaultRouter()
+router_v1.register('users', CustomUserViewSet, 'users')
+router_v1.register('tags', TagViewSet, basename='tags')
+router_v1.register('recipes', RecipesViewSet, basename='recipes')
+router_v1.register('ingredients', IngredientsViewSet, basename='ingredients')
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('', include(router_v1.urls)),
     path('', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
 ]

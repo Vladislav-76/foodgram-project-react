@@ -153,11 +153,16 @@ class RecipeSerializer(serializers.ModelSerializer):
             if not result:
                 raise ValidationError(f'Такого тега {tag} нет.')
 
+        ingredients_id = []
         ingredients_amount = []
         for ingredient in ingredients:
             result = Ingredient.objects.filter(id=ingredient['id'])
             if not result:
                 raise ValidationError(f'Такого ингредиента {ingredient} нет.')
+            if ingredient['id'] in ingredients_id:
+                raise ValidationError(
+                    f'Ингредиент {ingredient} в рецепте не может повторяться.')
+            ingredients_id.append(ingredient['id'])
             amount = ingredient.get('amount')
             if not isinstance(amount, (int, float)):
                 raise ValidationError(
