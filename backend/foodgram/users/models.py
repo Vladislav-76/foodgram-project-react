@@ -29,7 +29,7 @@ class User(AbstractUser):
         verbose_name='Фамилия',
         blank=False
     )
-    role = models.CharField(max_length=20, choices=ROLES, default='user')
+    role = models.CharField(max_length=20, choices=ROLES, default=USER)
 
     class Meta:
         verbose_name = "Пользователь"
