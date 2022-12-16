@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+
 ADMIN, USER = 'admin', 'user'
 ROLES = (
     (USER, 'Юзер'),
