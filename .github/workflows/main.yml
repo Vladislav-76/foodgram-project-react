@@ -85,6 +85,7 @@ jobs:
       - build_and_push_foodgram_backend_to_docker_hub
       - build_and_push_foodgram_frontend_to_docker_hub
     steps:
+    
       - name: executing remote ssh commands to deploy
       uses: appleboy/ssh-action@master
 
