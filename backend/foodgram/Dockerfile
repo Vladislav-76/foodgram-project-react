@@ -4,8 +4,7 @@ WORKDIR /app
 
 COPY requirements.txt ./
 
-RUN pip install --upgrade pip
-  && pip3 install -r ./requirements.txt --no-cache-dir
+RUN pip install --upgrade pip && pip3 install -r ./requirements.txt --no-cache-dir
 
 COPY ./ ./
 
