@@ -47,13 +47,13 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'foodgram.urls'
 
-CORS_ALLOWED_ORIGINS = [
-    'http://158.160.24.226:3000',
-    # 'http://localhost:3000',
-]
+# CORS_ALLOWED_ORIGINS = [
+#     'http://158.160.24.226:3000',
+#     'http://localhost:3000',
+# ]
 
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_URLS_REGEX = r'^/api/.*$'
+# CORS_ORIGIN_ALLOW_ALL = True
+# CORS_URLS_REGEX = r'^/api/.*$'
 
 TEMPLATES = [
     {
