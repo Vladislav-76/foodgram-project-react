@@ -52,6 +52,11 @@ class Subscriptions(models.Model):
         verbose_name='Автор'
     )
 
+    class Meta:
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"
+        ordering = ['user']
+
     def __str__(self):
         name = f'{self.user}-{self.author}'
         return name
