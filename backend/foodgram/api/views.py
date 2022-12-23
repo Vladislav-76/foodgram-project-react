@@ -10,6 +10,7 @@ from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
@@ -90,7 +91,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     """Представление для эндпойнта /recipes/"""
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    pagination_class = MyPagination
+    pagination_class = PageNumberPagination
     permission_classes = (AuthorAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
