@@ -19,7 +19,6 @@ from rest_framework.status import (HTTP_201_CREATED, HTTP_204_NO_CONTENT,
 from users.models import Subscriptions
 
 from .filter import RecipeFilter
-from .pagination import MyPagination
 from .permissions import AuthorAdminOrReadOnly
 from .serializers import (AddDelRecipeSerializer, CustomUserSerializer,
                           IngredientSerializer, RecipeSerializer,
@@ -34,7 +33,7 @@ class CustomUserViewSet(UserViewSet):
     queryset = User.objects.all()
     permission_classes = (AuthorAdminOrReadOnly,)
     serializer_class = CustomUserSerializer
-    pagination_class = MyPagination
+    pagination_class = PageNumberPagination
 
     @action(detail=False, methods=['get'],
             permission_classes=[IsAuthenticated])
