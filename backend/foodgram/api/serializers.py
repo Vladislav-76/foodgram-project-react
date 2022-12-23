@@ -163,8 +163,9 @@ class RecipeSerializer(serializers.ModelSerializer):
                 raise ValidationError(
                     f'Ингредиент {ingredient} в рецепте не может повторяться.')
             ingredients_id.append(ingredient['id'])
-            amount = ingredient.get('amount')
-            if not isinstance(amount, (int, float)):
+            try:
+                amount = float(ingredient.get('amount'))
+            except ValueError:
                 raise ValidationError(
                     f'Значение количества {amount} должно быть числом.')
             ingredient = get_object_or_404(Ingredient, id=ingredient['id'])
