@@ -9,7 +9,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['158.160.24.226', 'backend', '127.0.0.1', 'localhost']
 
@@ -46,14 +46,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'foodgram.urls'
-
-# CORS_ALLOWED_ORIGINS = [
-#     'http://158.160.24.226:3000',
-#     'http://localhost:3000',
-# ]
-
-# CORS_ORIGIN_ALLOW_ALL = True
-# CORS_URLS_REGEX = r'^/api/.*$'
 
 TEMPLATES = [
     {
@@ -129,7 +121,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': [
         'rest_framework.pagination.PageNumberPagination'
     ],
-    'PAGE_SIZE': 5,
+    'PAGE_SIZE': 6,
 }
 
 DJOSER = {
