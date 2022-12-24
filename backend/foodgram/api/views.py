@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
-from rest_framework import filters, status, viewsets
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.pagination import PageNumberPagination
@@ -18,7 +18,7 @@ from rest_framework.status import (HTTP_201_CREATED, HTTP_204_NO_CONTENT,
                                    HTTP_400_BAD_REQUEST)
 from users.models import Subscriptions
 
-from .filter import RecipeFilter
+from .filter import IngredientFilter, RecipeFilter
 from .permissions import AuthorAdminOrReadOnly
 from .serializers import (AddDelRecipeSerializer, CustomUserSerializer,
                           IngredientSerializer, RecipeSerializer,
@@ -173,5 +173,5 @@ class IngredientsViewSet(
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     pagination_class = None
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['name', ]
+    filter_backends = (IngredientFilter,)
+    search_fields = ('name',)
