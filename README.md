@@ -6,15 +6,18 @@
 http://158.160.24.226
 
 Вход в админку:
+
 username: 'admin@test.com'
+
 password: '123'
 
 ## Описание
 В этом сервисе пользователи смогут публиковать рецепты, подписываться на публикации других пользователей, добавлять понравившиеся рецепты в список «Избранное», а перед походом в магазин скачивать список продуктов, необходимых для приготовления выбранных блюд.
 
-![Main Web-Page View]()
+![Main Page](https://user-images.githubusercontent.com/102143019/209464009-4f37595f-a8c7-4ebd-9e86-05cb31a59ba6.png)
 
-![Recipe View]()
+![Subscribe Page](https://user-images.githubusercontent.com/102143019/209464074-8e6def29-4a80-47d3-aeb0-278905c9d114.png)
+
 
 
 ***
@@ -88,7 +91,6 @@ sudo chmod +x /usr/local/bin/docker-compose
 
 ```
 docker-compose --version
-```
 
 Docker Compose version v2.12.2
 ```
